@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  gather_facts: true
+  roles:
+    - role: set-timezone
+      vars:
+        input_timezone: Europe/Warsaw
+        input_locale: pl_PL.UTF-8
+        input_language: pl_PL:pl
+        input_lc_all: pl_PL.UTF-8

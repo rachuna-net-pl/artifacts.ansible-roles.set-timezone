@@ -1,0 +1,72 @@
+---
+- name: Ensure tzdata is installed (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: tzdata
+    state: present
+    update_cache: true
+  when: ansible_facts.os_family == "Debian"
+
+- name: Ensure locales package is installed (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: locales
+    state: present
+    update_cache: true
+  when: ansible_facts.os_family == "Debian"
+
+- name: Enable locale in /etc/locale.gen
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^#?\\s*{{ input_locale | replace('.', '\\\\.') }}\\s"
+    line: "{{ input_locale }} UTF-8"
+  when: ansible_facts.os_family == "Debian"
+
+- name: Check if locale is generated
+  ansible.builtin.stat:
+    path: "/usr/lib/locale/{{ input_locale }}"
+  register: locale_dir
+  when: ansible_facts.os_family == "Debian"
+
+- name: Generate locale
+  changed_when: false
+  ansible.builtin.command: "locale-gen {{ input_locale }}"
+  when:
+    - ansible_facts.os_family == "Debian"
+    - not locale_dir.stat.exists
+
+- name: Configure /etc/default/locale
+  ansible.builtin.copy:
+    dest: /etc/default/locale
+    mode: "0644"
+    content: |
+      LANG={{ input_locale }}
+      LANGUAGE={{ input_language }}
+      LC_ALL={{ input_lc_all }}
+  when: ansible_facts.os_family == "Debian"
+
+- name: Check if timedatectl is available
+  ansible.builtin.stat:
+    path: /usr/bin/timedatectl
+  register: timedatectl_bin
+
+- name: Set timezone via timedatectl
+  changed_when: false
+  ansible.builtin.command: "timedatectl set-timezone {{ input_timezone }}"
+  when: timedatectl_bin.stat.exists
+
+- name: Persist timezone in /etc/timezone
+  changed_when: false
+  ansible.builtin.copy:
+    dest: /etc/timezone
+    content: "{{ input_timezone }}\n"
+    mode: "0644"
+  when: ansible_facts.os_family == "Debian"
+
+- name: Link /etc/localtime when timedatectl is missing
+  ansible.builtin.file:
+    src: "/usr/share/zoneinfo/{{ input_timezone }}"
+    dest: /etc/localtime
+    state: link
+    force: true
+  when:
+    - ansible_facts.os_family == "Debian"
+    - not timedatectl_bin.stat.exists
