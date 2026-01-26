@@ -4,7 +4,7 @@
   roles:
     - role: set-timezone
       vars:
-        input_timezone: Europe/Warsaw
-        input_locale: pl_PL.UTF-8
-        input_language: pl_PL:pl
-        input_lc_all: pl_PL.UTF-8
+        in_timezone: Europe/Warsaw
+        in_locale: pl_PL.UTF-8
+        in_language: pl_PL:pl
+        in_lc_all: pl_PL.UTF-8

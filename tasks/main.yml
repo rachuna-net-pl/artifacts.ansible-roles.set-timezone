@@ -16,19 +16,19 @@
 - name: Enable locale in /etc/locale.gen
   ansible.builtin.lineinfile:
     path: /etc/locale.gen
-    regexp: "^#?\\s*{{ input_locale | replace('.', '\\\\.') }}\\s"
-    line: "{{ input_locale }} UTF-8"
+    regexp: "^#?\\s*{{ in_locale | replace('.', '\\\\.') }}\\s"
+    line: "{{ in_locale }} UTF-8"
   when: ansible_facts.os_family == "Debian"
 
 - name: Check if locale is generated
   ansible.builtin.stat:
-    path: "/usr/lib/locale/{{ input_locale }}"
+    path: "/usr/lib/locale/{{ in_locale }}"
   register: locale_dir
   when: ansible_facts.os_family == "Debian"
 
 - name: Generate locale
   changed_when: false
-  ansible.builtin.command: "locale-gen {{ input_locale }}"
+  ansible.builtin.command: "locale-gen {{ in_locale }}"
   when:
     - ansible_facts.os_family == "Debian"
     - not locale_dir.stat.exists
@@ -38,9 +38,9 @@
     dest: /etc/default/locale
     mode: "0644"
     content: |
-      LANG={{ input_locale }}
-      LANGUAGE={{ input_language }}
-      LC_ALL={{ input_lc_all }}
+      LANG={{ in_locale }}
+      LANGUAGE={{ in_language }}
+      LC_ALL={{ in_lc_all }}
   when: ansible_facts.os_family == "Debian"
 
 - name: Check if timedatectl is available
@@ -50,20 +50,20 @@
 
 - name: Set timezone via timedatectl
   changed_when: false
-  ansible.builtin.command: "timedatectl set-timezone {{ input_timezone }}"
+  ansible.builtin.command: "timedatectl set-timezone {{ in_timezone }}"
   when: timedatectl_bin.stat.exists
 
 - name: Persist timezone in /etc/timezone
   changed_when: false
   ansible.builtin.copy:
     dest: /etc/timezone
-    content: "{{ input_timezone }}\n"
+    content: "{{ in_timezone }}\n"
     mode: "0644"
   when: ansible_facts.os_family == "Debian"
 
 - name: Link /etc/localtime when timedatectl is missing
   ansible.builtin.file:
-    src: "/usr/share/zoneinfo/{{ input_timezone }}"
+    src: "/usr/share/zoneinfo/{{ in_timezone }}"
     dest: /etc/localtime
     state: link
     force: true
