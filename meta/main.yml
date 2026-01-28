@@ -1,6 +1,7 @@
 ---
 galaxy_info:
-  role_name: "set-timezone"
+  role_name: "set_timezone"
+  namespace: "pl_rachuna_net"
   author: mrachuna
   description: Configure timezone and locale on Debian/Ubuntu.
   license: MIT
@@ -13,7 +14,6 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - jammy
-        - noble
   galaxy_tags:
     - system
     - locale
