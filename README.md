@@ -1,4 +1,4 @@
-# <img src="docs/linux.png" alt="linux" height="20"/> set-timezone
+# <img src="docs/linux.png" alt="linux" height="30"/> set-timezone
 
 Ansible Role do ustawienia locale and time-zone.
 
